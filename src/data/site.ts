@@ -101,14 +101,14 @@ export const contactCTA = {
   subtitle: "Your ideas and suggestions help us improve and move forward.",
   cta: {
     label: "Contact Us",
-    href: "cookiegeekdev@gmail.com",
+    href: "mailto:support@cookiegeek.online",
   },
 };
 
 export const footer = {
   copyright: "© 2026 CookieGeek Inc. All rights reserved.",
   links: [
-    { label: "Privacy Policy", href: "#" },
-    { label: "Terms of Service", href: "#" },
+    { label: "Privacy Policy", href: "https://nauty.online/a2/pp.html" },
+    { label: "Terms of Service", href: "https://nauty.online/a2/tos.html" },
   ],
 };
