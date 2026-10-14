@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* These ramps deliberately pin the Tailwind v3 palette. Tailwind v4 ships its own
+   slate/blue in oklch, and the values differ visibly — blue-600 here is #2563eb
+   where the v4 default is #155dfc. Keep or drop this block as a single unit. */
 @theme {
   --color-slate-50: #f8fafc;
   --color-slate-100: #f1f5f9;
@@ -24,6 +27,12 @@
   --color-blue-800: #1e40af;
   --color-blue-900: #1e3a8a;
   --color-blue-950: #172554;
+
+  /* Focus-ring tokens. Button.tsx uses `ring-ring` and `ring-offset-background`;
+     without these the ring falls back to currentcolor and ends up invisible on
+     both the slate and blue backgrounds. */
+  --color-ring: #2563eb;
+  --color-background: #ffffff;
 }
 
 :root {
@@ -31,8 +40,52 @@
   --foreground: #0f172a; /* slate-900 */
 }
 
+/* Anchor targets (#overview, #vision, ...) must clear the fixed navbar. */
+html {
+  scroll-padding-top: 5rem;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* --------------------------------------------------------------- motion
+   Entrance motion is CSS-only so no animation library reaches the client. The
+   hidden start state lives in a keyframe rather than an inline style, which
+   means the page is fully visible when JavaScript never runs. */
+@keyframes cg-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Above the fold: plays once, immediately after paint. */
+.animate-rise {
+  animation: cg-reveal 0.5s ease-out both;
+}
+
+/* Below the fold: driven by scroll position where that is supported. Browsers
+   without scroll-driven animations simply render the section in place. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: cg-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .reveal {
+    animation: none;
+  }
 }

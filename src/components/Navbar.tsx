@@ -1,88 +1,130 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { Menu, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/Button";
+import { clsx } from "clsx";
+import { CloseIcon, MenuIcon } from "@/components/ui/icons";
 import { navbar, siteConfig } from "@/data/site";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
+  const toggleRef = React.useRef<HTMLButtonElement>(null);
+  const drawerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    const handleScroll = () => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
       setScrolled(window.scrollY > 20);
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Throttle to one read per frame and stay off the main thread while scrolling.
+    const handleScroll = () => {
+      if (frame === 0) frame = window.requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (frame !== 0) window.cancelAnimationFrame(frame);
+    };
   }, []);
+
+  // Escape dismisses the drawer. Focus is only pulled back to the toggle when it
+  // was actually inside the drawer, so a keyboard user is never moved elsewhere.
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      const active = document.activeElement;
+      const wasInside = active instanceof Node && drawerRef.current?.contains(active);
+      setIsOpen(false);
+      if (wasInside) toggleRef.current?.focus();
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isOpen]);
 
   return (
     <header
-      className={cn(
+      className={clsx(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b",
         scrolled
           ? "bg-white/80 backdrop-blur-md border-slate-200 py-2"
-          : "bg-transparent border-transparent py-4"
+          : "bg-transparent border-transparent py-4",
       )}
     >
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center space-x-2">
+        {/* This site has a single route, so next/link cannot enable any
+            client-side navigation here, and importing it would pull its entire
+            runtime (measured at ~3.8 kB gzip) into the client bundle. A full
+            reload on logo click is the accepted trade-off. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+        <a href="/" className="flex items-center space-x-2">
           <span className="text-xl font-bold tracking-tight text-slate-900">
             {siteConfig.logoText}
           </span>
-        </Link>
+        </a>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav aria-label="Main" className="hidden md:flex items-center space-x-8">
           {navbar.links.map((link) => (
-            <Link
+            <a
               key={link.href}
               href={link.href}
               className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
             >
               {link.label}
-            </Link>
+            </a>
           ))}
         </nav>
 
         {/* Mobile Toggle */}
         <button
+          ref={toggleRef}
+          type="button"
           className="md:hidden p-2 text-slate-600"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => setIsOpen((open) => !open)}
           aria-label="Toggle menu"
+          aria-expanded={isOpen}
+          aria-controls="mobile-nav"
         >
-          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {isOpen ? <CloseIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
         </button>
       </div>
 
-      {/* Mobile Drawer */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-b border-slate-200 overflow-hidden"
-          >
-            <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
-              {navbar.links.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-base font-medium text-slate-600 hover:text-blue-600 transition-colors py-2"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </motion.div>
+      {/* Mobile drawer. It stays mounted so the row transition can animate in both
+          directions, which is why `inert` is needed to keep the collapsed links
+          out of the tab order and the accessibility tree. */}
+      <div
+        id="mobile-nav"
+        ref={drawerRef}
+        inert={!isOpen}
+        className={clsx(
+          "md:hidden grid overflow-hidden transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
+          isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
         )}
-      </AnimatePresence>
+      >
+        <div className="overflow-hidden bg-white border-b border-slate-200">
+          <nav
+            aria-label="Mobile"
+            className="container mx-auto px-4 py-4 flex flex-col space-y-4"
+          >
+            {navbar.links.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-base font-medium text-slate-600 hover:text-blue-600 transition-colors py-2"
+                onClick={() => setIsOpen(false)}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </div>
     </header>
   );
 }

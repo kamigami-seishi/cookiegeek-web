@@ -1,44 +1,45 @@
 import { footer, siteConfig } from "@/data/site";
-import Link from "next/link";
+
+function FooterLink({ href, label }: { href: string; label: string }) {
+  // Plain anchors: every href is either an in-page #hash or an external/mailto
+  // target, so next/link would only contribute client runtime.
+  return (
+    <a href={href} className="text-sm text-slate-400 hover:text-white transition-colors">
+      {label}
+    </a>
+  );
+}
 
 export function Footer() {
   return (
     <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div className="col-span-1 md:col-span-1">
+        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-8 mb-8">
+          <div className="sm:col-span-3 md:col-span-1">
             <span className="text-xl font-bold text-white tracking-tight">
               {siteConfig.logoText}
             </span>
-            <p className="mt-4 text-sm">
-              {siteConfig.description}
-            </p>
-          </div>
-          
-          <div className="col-span-1">
-             {/* Spacer or additional columns if needed */}
+            <p className="mt-4 text-sm">{siteConfig.tagline}</p>
           </div>
 
-          <div className="col-span-1">
-             {/* Links column example */}
-          </div>
+          {footer.columns.map((column) => (
+            <div key={column.title}>
+              <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
+                {column.title}
+              </h2>
+              <ul className="space-y-3">
+                {column.links.map((link) => (
+                  <li key={link.label}>
+                    <FooterLink href={link.href} label={link.label} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-slate-800">
-          <p className="text-sm">
-            {footer.copyright}
-          </p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            {footer.links.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="text-sm hover:text-white transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
+        <div className="pt-8 border-t border-slate-800">
+          <p className="text-sm">{footer.copyright(new Date().getFullYear())}</p>
         </div>
       </div>
     </footer>

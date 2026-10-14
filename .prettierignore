@@ -1,0 +1,10 @@
+.next
+out
+node_modules
+package-lock.json
+public
+next-env.d.ts
+
+# Owned and rewritten by `next build` (it re-adds allowJs and reflows the file),
+# so formatting it would fail on every build.
+tsconfig.json
