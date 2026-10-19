@@ -1,49 +1,74 @@
-import { BarChart, Globe, LayoutDashboard, Shield, Users, Zap } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-
-import { Section } from "@/components/ui/Section";
-import { SectionHeading } from "@/components/ui/SectionHeading";
+import Image from "next/image";
 import { whatWeDo } from "@/data/site";
-import type { FeatureIcon } from "@/data/site";
-
-// Resolved here rather than in src/data/site.ts. That module is imported by the
-// client-side Navbar, so icon components stored there would be pulled into the
-// browser bundle even though they are only ever rendered on the server.
-const FEATURE_ICONS: Record<FeatureIcon, LucideIcon> = {
-  dashboard: LayoutDashboard,
-  shield: Shield,
-  zap: Zap,
-  globe: Globe,
-  chart: BarChart,
-  users: Users,
-};
 
 export function WhatWeDo() {
   return (
-    <Section id={whatWeDo.id}>
-      <div className="text-center mb-16">
-        <SectionHeading>{whatWeDo.title}</SectionHeading>
-        <p className="mt-4 text-lg text-slate-600">{whatWeDo.subtitle}</p>
-      </div>
+    <section id={whatWeDo.id} className="work" aria-labelledby="work-title">
+      <div className="site-shell">
+        <div className="work-heading">
+          <div>
+            <p className="eyebrow">
+              <span className="eyebrow-dot" />
+              {whatWeDo.eyebrow}
+            </p>
+            <h2 id="work-title" className="section-title">
+              {whatWeDo.title}
+            </h2>
+          </div>
+          <p className="section-description">{whatWeDo.subtitle}</p>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {whatWeDo.features.map((feature) => {
-          const Icon = FEATURE_ICONS[feature.icon];
-          return (
-            // The reveal owns `transform`, so the hover lift lives on an inner
-            // element to avoid the animation overriding it.
-            <div key={feature.title} className="reveal">
-              <div className="h-full p-8 rounded-2xl border border-slate-200 bg-white transition-[transform,box-shadow] duration-300 hover:-translate-y-1.5 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0">
-                <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6 text-blue-600">
-                  <Icon className="h-6 w-6" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
-                <p className="text-slate-600 leading-relaxed">{feature.description}</p>
+        <div className="work-list">
+          {whatWeDo.groups.map((group) => (
+            <article className={`work-row work-row--${group.id}`} key={group.id}>
+              <div className="work-visual">
+                <span
+                  className="work-visual__cross work-visual__cross--one"
+                  aria-hidden="true"
+                >
+                  +
+                </span>
+                <span
+                  className="work-visual__cross work-visual__cross--two"
+                  aria-hidden="true"
+                >
+                  +
+                </span>
+                <span className="work-visual__orbit" aria-hidden="true" />
+                <span className="work-visual__label" aria-hidden="true">
+                  CG / {group.number}
+                </span>
+                <Image
+                  src={group.image}
+                  alt={group.imageAlt}
+                  width={960}
+                  height={768}
+                  sizes="(min-width: 1000px) 460px, (min-width: 700px) 42vw, 90vw"
+                  className="work-visual__image"
+                />
               </div>
-            </div>
-          );
-        })}
+              <div className="work-row__copy">
+                <p className="work-row__meta">
+                  <span>{group.number}</span> / {group.label}
+                </p>
+                <h3>{group.title}</h3>
+                <p className="work-row__description">{group.description}</p>
+                <ul className="capability-list">
+                  {group.capabilities.map((capability) => (
+                    <li key={capability.title}>
+                      <span className="capability-list__point" aria-hidden="true" />
+                      <div>
+                        <h4>{capability.title}</h4>
+                        <p>{capability.description}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
-    </Section>
+    </section>
   );
 }

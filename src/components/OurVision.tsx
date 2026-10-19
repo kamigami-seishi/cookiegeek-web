@@ -1,35 +1,33 @@
-import { Section } from "@/components/ui/Section";
-import { SectionHeading } from "@/components/ui/SectionHeading";
+import Image from "next/image";
 import { ourVision } from "@/data/site";
-import { Quote } from "lucide-react";
 
 export function OurVision() {
   return (
-    <Section id={ourVision.id} className="bg-slate-900 text-white relative">
-      {/* Background decoration. The clipping lives on this wrapper instead of on the
-          section, so the scroll-driven reveal below has no nested scroll container
-          to measure its view() timeline against. */}
-      <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-500 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-500 rounded-full blur-3xl" />
-      </div>
-
-      <div className="reveal relative max-w-4xl mx-auto text-center">
-        <SectionHeading className="mb-8">{ourVision.title}</SectionHeading>
-        <p className="text-xl text-slate-300 leading-relaxed mb-12">
-          {ourVision.description}
-        </p>
-
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 md:p-12">
-          <Quote className="h-8 w-8 text-blue-400 mx-auto mb-6" />
-          <blockquote className="text-2xl font-medium italic text-white mb-6">
-            &ldquo;{ourVision.quote}&rdquo;
-          </blockquote>
-          <cite className="not-italic text-slate-400 font-medium">
-            — {ourVision.author}
-          </cite>
+    <section id={ourVision.id} className="vision" aria-labelledby="vision-title">
+      <div className="vision__grid" aria-hidden="true" />
+      <div className="site-shell vision__inner">
+        <div className="vision__copy">
+          <p className="eyebrow eyebrow--bright">
+            <span className="eyebrow-dot" />
+            {ourVision.eyebrow}
+          </p>
+          <h2 id="vision-title" className="section-title">
+            {ourVision.title}
+          </h2>
+          <p className="section-description">{ourVision.description}</p>
+        </div>
+        <div className="vision__graphic" aria-hidden="true">
+          <span className="vision__ring vision__ring--outer" />
+          <span className="vision__ring vision__ring--inner" />
+          <span className="vision__center">
+            <Image src="/brand/cookie-mark.webp" alt="" width={512} height={512} />
+          </span>
+          <span className="vision__satellite vision__satellite--one" />
+          <span className="vision__satellite vision__satellite--two" />
+          <span className="vision__satellite vision__satellite--three" />
+          <span className="vision__caption">{ourVision.note}</span>
         </div>
       </div>
-    </Section>
+    </section>
   );
 }

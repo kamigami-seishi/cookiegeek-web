@@ -4,8 +4,8 @@ Marketing site for CookieGeek, deployed as a fully static export to
 [cookiegeek.online](https://cookiegeek.online) via GitHub Pages.
 
 - **Framework:** Next.js 16 (App Router, `output: "export"`)
-- **Styling:** Tailwind CSS v4 (CSS-first `@theme`, no config file)
-- **Icons:** lucide-react
+- **Styling:** Tailwind CSS v4 with custom CSS variables and component styles
+- **Icons:** inline SVG menu controls and the CookieGeek brand artwork
 - **Runtime JS:** one client component (`Navbar`); every content section is a
   server component
 
@@ -48,57 +48,51 @@ into a single force-pushed commit instead, if the growth becomes a problem.
 
 ## Content
 
-All copy lives in [`src/data/site.ts`](src/data/site.ts): navigation, hero, stats,
-features, vision, contact and the footer columns. The canonical origin is
-`siteConfig.url`.
+Most section copy and links live in [`src/data/site.ts`](src/data/site.ts):
+navigation, hero, overview principles, work groups, vision, contact and footer
+columns. The canonical origin is `siteConfig.url`.
 
 ## Images
 
 `src/app/` uses the Next.js file conventions for `favicon.ico`, `icon.png`,
-`apple-icon.png` and `opengraph-image.png`, so the icon links and the social-card
-metadata are derived from those files automatically.
+`apple-icon.png` and `opengraph-image.png`. These now use the cookie mascot brand
+identity for browser icons and social sharing.
 
-The hero art is served as pre-encoded WebP widths through a `<picture>` element in
-[`src/components/Hero.tsx`](src/components/Hero.tsx). `next/image` cannot emit a
-`srcSet` while `images.unoptimized` is set — which static export requires — so the
-widths are committed under `public/`:
+The site serves the new brand illustrations from `public/brand/`:
 
-| File                         | Width |
-| ---------------------------- | ----- |
-| `cookiegeekvision-640.webp`  | 640   |
-| `cookiegeekvision-960.webp`  | 960   |
-| `cookiegeekvision-1280.webp` | 1280  |
-| `cookiegeekvision-1536.webp` | 1536  |
+| File                   | Use                                                           |
+| ---------------------- | ------------------------------------------------------------- |
+| `cookie-mark.webp`     | Small brand mark in the navigation, vision section and footer |
+| `cookie-mascot.webp`   | Hero illustration of the cookie character with a laptop       |
+| `feature-create.webp`  | Create capability illustration                                |
+| `feature-refine.webp`  | Refine capability illustration                                |
+| `feature-connect.webp` | Connect capability illustration                               |
 
-`public/cookiegeekvision.png` remains as the fallback for browsers without WebP. If
-the artwork changes, re-encode at those four widths and update `hero.image.webp` in
-`src/data/site.ts` if the widths change.
+The source PNGs and generation briefs are documented in
+[`assets/brand/README.md`](assets/brand/README.md). The older
+`public/cookiegeekvision*` files are retained in the repository but are no longer
+used as the page's main artwork.
 
 ## Notes for future changes
 
-- **Colour palette.** The `@theme` block in `src/app/globals.css` deliberately pins
-  the Tailwind **v3** slate and blue ramps. Tailwind v4 ships different values — its
-  blue-600 is `#155dfc` where this one is `#2563eb`. Change or remove the block as a
-  single unit.
-- **Motion is CSS-only.** Scroll reveals use `animation-timeline: view()` behind an
-  `@supports` guard, and the hidden start state lives in a keyframe rather than an
-  inline style. That keeps the page fully readable when JavaScript never runs, and
-  `prefers-reduced-motion` disables the motion entirely. Browsers without
-  scroll-driven animations simply render the sections in place.
-- **Focus styling.** `Button` depends on the `--color-ring` and `--color-background`
-  tokens. Without them the focus ring falls back to `currentcolor` and becomes
-  invisible on the dark and blue buttons.
+- **Colour palette.** `src/app/globals.css` defines the brand colours as CSS
+  variables in `:root`: night, cocoa, gold, cyan and paper. Keep the focus colours
+  legible when changing either dark or light surfaces.
+- **Motion is CSS-only.** The hero entrance, glowing nodes and hover feedback use
+  CSS animations and transitions. `prefers-reduced-motion` disables the hero and
+  node animations and the main hover transforms.
+- **Focus styling.** A global `:focus-visible` outline is adjusted for dark and
+  light sections in `src/app/globals.css`.
 - **`tsconfig.json` is owned by Next.js.** `next build` re-adds `allowJs` and reflows
   the file, which is why it is excluded from Prettier.
-- **`cn()` is server-only.** It wraps `tailwind-merge`, whose class-conflict table
-  costs roughly 8 kB gzip. Importing it from a client component ships that table to
-  the browser, so client components should use `clsx` from `"clsx"` directly.
+- **`cn()` is server-only.** It wraps `tailwind-merge`; importing it from a client
+  component ships the class-conflict table to the browser, so client components
+  should use `clsx` from `"clsx"` directly.
 - **There is no `next/link`.** The site has a single route, so `<Link>` could not
   enable any client-side navigation while costing about 3.8 kB gzip. All navigation
   is plain anchors, including the logo; `Navbar.tsx` carries a scoped
   eslint-disable for `@next/next/no-html-link-for-pages` that explains the
   trade-off.
-- **Icons.** Server-rendered icons come from lucide-react. The two drawn inside the
-  client `Navbar` are inlined in `src/components/ui/icons.tsx`, and the feature icons
-  are referenced by key in `site.ts` and resolved in `WhatWeDo.tsx` — a data module
-  imported by a client component must not hold icon components.
+- **Icons.** The menu and close controls are inlined in
+  `src/components/ui/icons.tsx`. The feature sections use the brand illustrations
+  listed above.

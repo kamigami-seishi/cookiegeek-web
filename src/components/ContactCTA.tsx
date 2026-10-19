@@ -1,18 +1,27 @@
-import { Section } from "@/components/ui/Section";
-import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Button } from "@/components/ui/Button";
 import { contactCTA } from "@/data/site";
 
 export function ContactCTA() {
   return (
-    <Section id={contactCTA.id} className="bg-blue-600 text-white">
-      <div className="text-center max-w-2xl mx-auto">
-        <SectionHeading className="mb-4">{contactCTA.title}</SectionHeading>
-        <p className="text-blue-50 text-lg mb-8">{contactCTA.subtitle}</p>
-        <Button asChild size="lg" className="bg-white text-blue-600 hover:bg-blue-50">
-          <a href={contactCTA.cta.href}>{contactCTA.cta.label}</a>
+    <section id={contactCTA.id} className="contact" aria-labelledby="contact-title">
+      <div className="site-shell contact__inner">
+        <div>
+          <p className="eyebrow">
+            <span className="eyebrow-dot" />
+            {contactCTA.eyebrow}
+          </p>
+          <h2 id="contact-title" className="section-title">
+            {contactCTA.title}
+          </h2>
+          <p className="section-description">{contactCTA.subtitle}</p>
+        </div>
+        <Button asChild variant="ink" size="lg">
+          <a href={contactCTA.cta.href}>
+            {contactCTA.cta.label}
+            <span aria-hidden="true">↗</span>
+          </a>
         </Button>
       </div>
-    </Section>
+    </section>
   );
 }
