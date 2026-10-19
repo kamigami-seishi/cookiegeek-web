@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/postbuild.mjs",
+    "build": "next build --webpack && node scripts/postbuild.mjs",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d out -t",
     "start": "next start",

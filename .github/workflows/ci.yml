@@ -72,6 +72,17 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+      # `gh-pages` clones the repository into its own cache directory, so the
+      # credential actions/checkout writes into .git/config is not inherited and
+      # the push dies with "could not read Username for 'https://github.com'".
+      # Embedding the token in the remote URL is gh-pages' documented Actions
+      # recipe; the URL is never echoed, and Actions masks the token in logs.
+      - name: Point origin at an authenticated URL
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git remote set-url origin "https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
       # `npm run deploy` triggers the `predeploy` hook, which builds first, so
       # the published tree can never be stale.
       - name: Publish to the gh-pages branch

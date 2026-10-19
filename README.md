@@ -18,7 +18,7 @@ Node.js 22 or newer (CI pins 22).
 | Script              | Purpose                                                                               |
 | ------------------- | ------------------------------------------------------------------------------------- |
 | `npm run dev`       | Local dev server                                                                      |
-| `npm run build`     | Production build into `out/`, then strips source maps                                 |
+| `npm run build`     | Webpack production export into `out/`; fails if source maps are present               |
 | `npm run verify`    | Validates the exported `out/` — run after `build`                                     |
 | `npm run lint`      | ESLint                                                                                |
 | `npm run typecheck` | `tsc --noEmit`                                                                        |

@@ -1,13 +1,12 @@
 /**
- * Post-build cleanup for the static export.
+ * Post-build validation for the static export.
  *
- * `next build` emits at least one browser source map into `out/`, and `gh-pages`
- * publishes the whole directory verbatim, which would serve the original source
- * of a chunk to anyone who guesses the URL. Strip them so the published tree
- * never contains `.map` files, regardless of how the export is uploaded.
+ * `gh-pages` publishes the whole `out/` directory verbatim. Reject an export
+ * containing source maps so original chunk sources cannot be published.
+ * The build must avoid generating them; this script never deletes files.
  */
 
-import { readdir, rm, stat } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 
@@ -29,19 +28,18 @@ if (!existsSync(outDir)) {
   process.exit(0);
 }
 
-let removed = 0;
-let bytes = 0;
+const sourceMaps = [];
 
 for await (const file of walk(outDir)) {
   if (!file.endsWith(".map")) continue;
-  bytes += (await stat(file)).size;
-  await rm(file);
-  removed += 1;
-  console.log(`postbuild: removed ${path.relative(outDir, file)}`);
+  sourceMaps.push(path.relative(outDir, file));
 }
 
-console.log(
-  removed > 0
-    ? `postbuild: stripped ${removed} source map(s), ${bytes.toLocaleString()} B`
-    : "postbuild: no source maps found.",
-);
+if (sourceMaps.length > 0) {
+  console.error("postbuild: source maps found in out/; refusing to publish:");
+  for (const file of sourceMaps) console.error(`  ${file}`);
+  console.error("Disable source map generation before building again.");
+  process.exit(1);
+}
+
+console.log("postbuild: no source maps found.");
